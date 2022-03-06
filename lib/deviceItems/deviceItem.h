@@ -59,7 +59,7 @@ class DeviceItem{
     void newTimerOn(int time = -1){_timerOn = time;}
     void newTimerOff(int time = -1){_timerOff = time;}
     void newTimerOnState(bool state = false){_timerOnState = state;}
-    void newTImerOffState(bool state = false){_timerOffState = state;}
+    void newTimerOffState(bool state = false){_timerOffState = state;}
     void newTimer(bool timer = false){_timer = timer;}
 
     // Constructor
@@ -73,6 +73,7 @@ class DeviceItem{
 
     void changeState();
     void turnOff();
+    void turnOn();
     void setTimerOn(int, int);
     void setTimerOff(int, int);
     int getHourOn();
@@ -80,10 +81,11 @@ class DeviceItem{
     int getHourOff();
     int getMinuteOff();
 
-    // TODO
     bool isTimeToOn();
     bool isTimeToOff();
 
+    // TODO
+    void sendToDevice();
 
     // static void buildListObjects(std::vector<DeviceItem>* , String, String);
     static void addObject(std::vector<DeviceItem>*, String);

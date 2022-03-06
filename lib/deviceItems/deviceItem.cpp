@@ -10,7 +10,7 @@ DeviceItem::DeviceItem(String name, int id, int pinName, Status status, bool tim
   newState(status);
   newTimer(timer);
   newTimerOnState(timerOnState);
-  newTImerOffState(timerOffState);
+  newTimerOffState(timerOffState);
   newTimerOn(timerOn);
   newTimerOff(timerOff);
   newRepeat(repeat);
@@ -27,7 +27,7 @@ DeviceItem::DeviceItem(String name, int id, int pinName)
   newState(Status::OFF);
   newTimer(false);
   newTimerOnState(false);
-  newTImerOffState(false);
+  newTimerOffState(false);
   newTimerOn(-1);
   newTimerOff(-1);
   newRepeat(Repeat::Once);
@@ -80,6 +80,7 @@ void DeviceItem::newState(Status state = Status::OFF)
       _state = Status::OPEN;
     break;
   }
+  sendToDevice();
 }
 
 void DeviceItem::changeState()
@@ -99,6 +100,7 @@ void DeviceItem::changeState()
       _state = Status::OPEN;
     break;
   }
+  sendToDevice();
 }
 
 void DeviceItem::newDay(int index = 0, bool value = false){
@@ -114,6 +116,11 @@ void DeviceItem::newDay(int index = 0, bool value = false){
       bool days[] = {false, false, false, false, false, false, false};
       newDays(days);
     }  
+}
+
+void DeviceItem::turnOn()
+{
+  newState(Status::ON);
 }
 
 void DeviceItem::turnOff(){
@@ -286,7 +293,7 @@ void DeviceItem::updateObject(std::vector<DeviceItem> listItems[], int index, St
   // Serial.println("update OK");
   listItems->at(index).newTimerOnState(json["timerOnState"].as<bool>());
   // Serial.println("update OK");
-  listItems->at(index).newTImerOffState(json["timerOffState"].as<bool>());
+  listItems->at(index).newTimerOffState(json["timerOffState"].as<bool>());
   // Serial.println("update OK");
   listItems->at(index).newTypeState((json["typeState"].as<int>() == 1)? TypeStatus::OnOff:TypeStatus::OpenClose);
   // Serial.println("update OK");
@@ -386,7 +393,7 @@ bool DeviceItem::checkTimer(int time, bool mode){
         newTimerOnState(false);}
       else {
         newState(Status::OFF);
-        newTImerOffState(false);
+        newTimerOffState(false);
       }
       return true;
       }      
@@ -406,4 +413,16 @@ bool DeviceItem::checkTimer(int time, bool mode){
     break;
   }
   return false;
+}
+
+void DeviceItem::sendToDevice()
+{
+  if (status() == Status::ON || status() == Status::OPEN)
+  {
+    digitalWrite(pinName(), HIGH); // ON
+  }
+  else
+  {
+    digitalWrite(pinName(), LOW); // OFF
+  }
 }
