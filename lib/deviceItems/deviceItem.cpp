@@ -1,11 +1,12 @@
 #include "DeviceItem.h"
 
-DeviceItem::DeviceItem(String name, int id, int pinName, Status status, bool timer, bool timerOnState, bool timerOffState, TypeStatus typeState,
-                       int timerOn, int timerOff, Repeat repeat, bool *days)
+DeviceItem::DeviceItem(String name, int id, int pinName, int buttonName, Status status, bool timer, bool timerOnState, bool timerOffState, 
+    TypeStatus typeState, int timerOn, int timerOff, Repeat repeat, bool *days)
 {
   newName(name);
   newId(id);
   newPinName(pinName);
+  newButtonName(buttonName);
   newTypeState(typeState);
   newState(status);
   newTimer(timer);
@@ -17,11 +18,12 @@ DeviceItem::DeviceItem(String name, int id, int pinName, Status status, bool tim
   newDays(days);
 }
 
-DeviceItem::DeviceItem(String name, int id, int pinName)
+DeviceItem::DeviceItem(String name, int id, int pinName, int buttonName)
 {
   newName(name);
   newId(id);
   newPinName(pinName);
+  newButtonName(buttonName);
 
   newTypeState(TypeStatus::OnOff);
   newState(Status::OFF);
@@ -33,6 +35,10 @@ DeviceItem::DeviceItem(String name, int id, int pinName)
   newRepeat(Repeat::Once);
   bool days[] = {false, false, false, false, false, false, false};
   newDays(days);
+}
+
+DeviceItem::~DeviceItem(){
+  delete []  days;
 }
 
 void DeviceItem::newDays(bool *day)

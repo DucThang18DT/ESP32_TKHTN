@@ -18,6 +18,7 @@ class DeviceItem{
     String _name;
     int _id;
     int _pinName;
+    int _buttonName;
     Status _state;
     bool _timer;
     bool _timerOnState;
@@ -34,6 +35,7 @@ class DeviceItem{
 
     // getter
     int pinName(){return _pinName;}
+    int buttonName(){return _buttonName;}
     int id(){return _id;}
     String name(){return _name;}
     TypeStatus typeState(){return _typeState;}
@@ -54,6 +56,7 @@ class DeviceItem{
     void newDay(int, bool);
     void newDays(bool*); 
     void newPinName(int pinName = 0){_pinName = pinName;}
+    void newButtonName(int buttonName = 0){_buttonName = buttonName;}
     void newTypeState(TypeStatus);
     void newState(Status);
     void newTimerOn(int time = -1){_timerOn = time;}
@@ -64,8 +67,9 @@ class DeviceItem{
 
     // Constructor
     DeviceItem(){} 
-    DeviceItem(String, int, int);
-    DeviceItem(String, int, int, Status, bool, bool, bool, TypeStatus, int, int, Repeat, bool*);
+    DeviceItem(String name, int id, int pinName, int buttonName);
+    DeviceItem(String name, int id, int pinName, int buttonName, Status status, bool timer, bool timerOnState, bool timerOffState, 
+    TypeStatus typeState, int timerOn, int timerOff, Repeat repeat, bool *days);
 
     // Destructor
     ~DeviceItem(){}
@@ -85,6 +89,7 @@ class DeviceItem{
     bool isTimeToOff();
 
     // TODO
+    bool isPressed(); // check if button are pressing or not
     void sendToDevice();
 
     // static void buildListObjects(std::vector<DeviceItem>* , String, String);
