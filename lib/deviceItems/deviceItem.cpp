@@ -99,6 +99,7 @@ void DeviceItem::changeState()
       _state = Status::OPEN;
     break;
   }
+  digitalWrite(_pinName, ((_state == ON) || (_state == OPEN))? HIGH: LOW);
 }
 
 void DeviceItem::newDay(int index = 0, bool value = false){
@@ -118,6 +119,7 @@ void DeviceItem::newDay(int index = 0, bool value = false){
 
 void DeviceItem::turnOff(){
   newState(Status::OFF);
+  digitalWrite(_pinName, LOW);
 }
 
 void DeviceItem::setTimerOn(int hour = 0, int minute = -1){

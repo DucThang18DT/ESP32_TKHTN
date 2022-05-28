@@ -1,6 +1,7 @@
 #ifndef _DEVICE_H_
 #define _DEVICE_H_
 
+#include <Arduino.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <ArduinoJson.h>
@@ -63,7 +64,7 @@ class DeviceItem{
     void newTimer(bool timer = false){_timer = timer;}
 
     // Constructor
-    DeviceItem(){} 
+    DeviceItem(){pinMode(_pinName, OUTPUT);} 
     DeviceItem(String, int, int);
     DeviceItem(String, int, int, Status, bool, bool, bool, TypeStatus, int, int, Repeat, bool*);
 
