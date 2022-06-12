@@ -37,14 +37,16 @@ String localIP(){
 }
 
 void wifiStreamCallback(StreamData data){
-    Serial.printf("\nstream path: %s\nevent path: %s\ndata type: %s\nevent type: %s\n\n",
-        data.streamPath().c_str(),
-        data.dataPath().c_str(),
-        data.dataType().c_str(),
-        data.eventType().c_str());
-    Serial.println();   
-    FBRtDatabase wifiData = FBRtDatabase(HOST, AUTH, "/", "");
-    String _data = wifiData.getData("/Wifi");
+    // Serial.printf("\nstream path: %s\nevent path: %s\ndata type: %s\nevent type: %s\n\n",
+    //     data.streamPath().c_str(),
+    //     data.dataPath().c_str(),
+    //     data.dataType().c_str(),
+    //     data.eventType().c_str());
+    // Serial.println();   
+    Serial.printf("\nwifi callback running on core: ");
+    Serial.println(xPortGetCoreID());
+    FBRtDatabase* wifiData = new FBRtDatabase(HOST, AUTH, "/", "");
+    String _data = wifiData->getData("/Wifi");
     DynamicJsonDocument jsonData(200);
     deserializeJson(jsonData, _data);
     bool _connect = jsonData["Connect"].as<bool>();
@@ -57,7 +59,7 @@ void wifiStreamCallback(StreamData data){
         jsonData["Connect"] = true;
         jsonData["Change"] = false;
         serializeJson(jsonData, _data);
-        wifiData.sendData("Wifi", _data, Mode::update);
+        wifiData->sendData("Wifi", _data, Mode::update);
     }
     if (!_change && !_connect) disconnect();
 }
@@ -66,4 +68,24 @@ void wifiStreamTimeOutCallback(bool timeOut){
     Serial.println("timeOut founction");
   if (timeOut)
     Serial.println("stream timeout, resuming...\n");
+}
+
+void WifiStream(){
+    FBRtDatabase* wifiData = new FBRtDatabase(HOST, AUTH, "/", "");
+    String _data = wifiData->getData("/Wifi");
+    DynamicJsonDocument jsonData(200);
+    deserializeJson(jsonData, _data);
+    bool _connect = jsonData["Connect"].as<bool>();
+    bool _change = jsonData["Change"].as<bool>();
+    if (!_connect && _change){
+        if (!changeWifi(jsonData["SSID"].as<String>(), jsonData["Pass"].as<String>())){
+            jsonData["SSID"] = mySsid;
+            jsonData["Pass"] = myPass;}
+        jsonData["IP"] = localIP();
+        jsonData["Connect"] = true;
+        jsonData["Change"] = false;
+        serializeJson(jsonData, _data);
+        wifiData->sendData("Wifi", _data, Mode::update);
+    }
+    if (!_change && !_connect) disconnect();
 }

@@ -24,12 +24,12 @@ class DeviceItem{
     bool _timerOnState;
     bool _timerOffState;
     TypeStatus _typeState;
-    int _timerOn;
-    int _timerOff;
+    long _timerOn;
+    long _timerOff;
     Repeat _repeat;
     bool _days[7];
 
-    bool checkTimer(int, bool);
+    bool checkTimer(long, bool);
   
   public:
 
@@ -40,8 +40,8 @@ class DeviceItem{
     TypeStatus typeState(){return _typeState;}
     Status status(){return _state;}
     Repeat repeat(){return _repeat;}
-    int timerOn(){return _timerOn;}
-    int timerOff(){return _timerOff;}
+    long timerOn(){return _timerOn;}
+    long timerOff(){return _timerOff;}
     bool timerOnState(){return _timerOnState;}
     bool timerOffState(){return _timerOffState;}
     bool timer(){return _timer;}
@@ -54,11 +54,11 @@ class DeviceItem{
     void newId(int id = 0){_id = id;}
     void newDay(int, bool);
     void newDays(bool*); 
-    void newPinName(int pinName = 0){_pinName = pinName;}
+    void newPinName(int pinName);
     void newTypeState(TypeStatus);
     void newState(Status);
-    void newTimerOn(int time = -1){_timerOn = time;}
-    void newTimerOff(int time = -1){_timerOff = time;}
+    void newTimerOn(long time = -1){_timerOn = time;}
+    void newTimerOff(long time = -1){_timerOff = time;}
     void newTimerOnState(bool state = false){_timerOnState = state;}
     void newTImerOffState(bool state = false){_timerOffState = state;}
     void newTimer(bool timer = false){_timer = timer;}
@@ -66,7 +66,7 @@ class DeviceItem{
     // Constructor
     DeviceItem(){pinMode(_pinName, OUTPUT);} 
     DeviceItem(String, int, int);
-    DeviceItem(String, int, int, Status, bool, bool, bool, TypeStatus, int, int, Repeat, bool*);
+    DeviceItem(String, int, int, Status, bool, bool, bool, TypeStatus, long, long, Repeat, bool*);
 
     // Destructor
     ~DeviceItem(){}
@@ -85,8 +85,6 @@ class DeviceItem{
     bool isTimeToOn();
     bool isTimeToOff();
 
-
-    // static void buildListObjects(std::vector<DeviceItem>* , String, String);
     static void addObject(std::vector<DeviceItem>*, String);
     static void updateObject(std::vector<DeviceItem>*, int, String);
     static String buildJson(std::vector<DeviceItem>*, String);

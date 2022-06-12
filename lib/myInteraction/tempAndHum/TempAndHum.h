@@ -2,18 +2,21 @@
 #define _TEMPANDHUM_H_
 
     #include <FBRtDatabase.h>
-    #include <sensors/tempAndHumSensor/TempAndHumSensor.h>
-    #include <digitalClock/DigitalClock.h>
-    #include <sensors/tempAndHum/DHT.h>
+    #include <ESPDateTime.h>
+    #include <DHT.h>
 
-    #define DHTPIN 22
+    #include <mutex>
+
+    static std::mutex mtx;
+
+    const int DHTPIN = 15;
+    const int DHTTYPE = DHT11;
+    static DHT dht(DHTPIN, DHTTYPE);
+
     static String TEMPPATH = "/Temperature";
     static String HUMPATH = "/Humidity";
     static String TEMPKEY = "/temperatures";
     static String HUMKEY = "/humidities";
-
-    static TempAndHumSensor dhtSensor = TempAndHumSensor(DHTPIN, DHTType::DHT11);
-    static FBRtDatabase dhtDatabase = FBRtDatabase(HOST, AUTH, "/", "");
 
     typedef struct
     {
@@ -23,13 +26,16 @@
     
     // return date: "dd-mm"
     String _today();
-    void sendDhtData();
-
+    DHT* getDhtREf();
 
     void vSenderTemp( void *pvParameters );
     void vSenderHumi( void *pvParameters );
     void vReceiverTask( void *pvParameters );
 
-    static QueueHandle_t xQueue = xQueueCreate( 2, sizeof( xData ) );
+    static FBRtDatabase dhtDatabase = FBRtDatabase(HOST, AUTH, "/", "");
+    static QueueHandle_t xQueue = xQueueCreate( 5, sizeof( xData ) );
+
+    QueueHandle_t* getQueueRef();
+
 
 #endif

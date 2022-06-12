@@ -1,74 +1,55 @@
-// #define ARDUINOJSON_ENABLE_COMMENTS 1
-// #include <WiFiClient.h>
-
 #include <myTask/myTask.h>
+#include "soc/rtc_wdt.h"
 
 unsigned long referenceTime;
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
+  // turn off watchdog timer
+  rtc_wdt_protect_off();
+  rtc_wdt_disable();
+
   connectWifi(mySsid.c_str(), myPass.c_str());
   fbDatatbase.connect();
   
   buildListDevices(&listDevices);
   delay(1000);
-  String jsonStr = DeviceItem::buildJson(&listDevices, KEY);
-  fbDatatbase.sendData("/ESPTest/setTest1", jsonStr, Mode::set);
-  
-  Firebase.beginStream(fbStreamData, "/testUser1");
-  Serial.println("(main) begin Stream");
-  Firebase.setStreamCallback(fbStreamData, streamCallback, streamTimeOutCallback);
-  Serial.println("(main) set Stream callback: OK");
 
-  referenceTime = millis();
-
-  xTaskCreatePinnedToCore(
-    alarm,
-    "Check Alarm",
-    5000,       /* Stack size of task */
-    NULL,        /* parameter of the task */
-    0,           /* priority of the task */
-    &Task2,      /* Task handle to keep track of created task */
-    0);
-
-  xTaskCreatePinnedToCore(
-    dhtData,
-    "DHT Data",
-    5000,       /* Stack size of task */
-    NULL,        /* parameter of the task */
-    0,           /* priority of the task */
-    &Task3,      /* Task handle to keep track of created task */
-    1);
-  
-  xTaskCreatePinnedToCore(
-    wifiData,
-    "Wifi Data",
-    5000,       /* Stack size of task */
-    NULL,        /* parameter of the task */
-    0,           /* priority of the task */
-    &Task4,      /* Task handle to keep track of created task */
-    1);
-
-  if( xQueue != NULL )
+  getDhtREf()->begin();
+  if( *(getQueueRef()) != NULL )
   {
-    xTaskCreate( vSenderTemp, "Sender1", 200, NULL, 2, NULL );
-    xTaskCreate( vSenderHumi, "Sender2", 200, NULL , 2, NULL );
-    xTaskCreate( vReceiverTask, "Receiver", 128, NULL, 1, NULL );
+    Serial.println("\nDHT task");
+    xTaskCreatePinnedToCore( vSenderTemp, "Sender1", 5000, NULL, 2, NULL ,0);
+    xTaskCreatePinnedToCore( vSenderHumi, "Sender2", 5000, NULL , 2, NULL ,0);
+    xTaskCreatePinnedToCore( vReceiverTask, "Receiver", 10000, NULL, 1, NULL,0); 
+    // vTaskStartScheduler();
   }
+
+  xTaskCreatePinnedToCore(buildListItem,"Build list item",10000, NULL, 1, &Task3, 1);
+  xTaskCreatePinnedToCore(alarm, "Check Alarm", 5000, NULL, 1, &Task2, 1);
+  xTaskCreatePinnedToCore(WifiData, "Wifi Data", 20000, NULL, 0, &Task4, 1);
 
   Serial.printf("\nRunning on core: ");
   Serial.println(xPortGetCoreID());
 }
 
 void loop() {
-  if (abs(millis() - referenceTime >= 10000)){
-    referenceTime = millis();
-    Serial.println("\n-------List Devices-------");
-    for (int i = 0; i< listDevices.size(); i++){
-      Serial.println(listDevices.at(i).name());
-    }
-    DigitalClock myDClock;
-    myDClock.showDate();
-    delay(80);
-  }
+  // if (abs(millis() - referenceTime >= 10000)){
+  //   referenceTime = millis();
+  //   Serial.println("\n-------List Devices-------");
+  //   Serial.printf("size = %d\n", listDevices.size());
+  //   for (int i = 0; i< listDevices.size(); i++){
+  //     Serial.println(listDevices.at(i).name());
+  //   }
+  // }
+  // mtx.lock();
+  // // disconnect();
+  // delay(2000);
+  // float hum = getDhtREf()->readHumidity();
+  // Serial.printf("\nHum = %f\n", hum);
+  // float temp = getDhtREf()->readTemperature();
+  // Serial.printf("\ntemp = %f\n", temp);
+  // delay(2000);
+  // // connectWifi(mySsid.c_str(), myPass.c_str());
+  // mtx.unlock();
 }

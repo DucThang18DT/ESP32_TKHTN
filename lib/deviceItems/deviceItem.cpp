@@ -1,7 +1,13 @@
 #include "DeviceItem.h"
 
+void DeviceItem::newPinName(int pinName){
+  _pinName = pinName;
+  // Serial.printf("\nnewPin = %d\n", _pinName);
+  pinMode(_pinName, OUTPUT);
+}
+
 DeviceItem::DeviceItem(String name, int id, int pinName, Status status, bool timer, bool timerOnState, bool timerOffState, TypeStatus typeState,
-                       int timerOn, int timerOff, Repeat repeat, bool *days)
+                       long timerOn, long timerOff, Repeat repeat, bool *days)
 {
   newName(name);
   newId(id);
@@ -63,7 +69,7 @@ void DeviceItem::newTypeState(TypeStatus type = TypeStatus::OnOff)
   }
 }
 
-void DeviceItem::newState(Status state = Status::OFF)
+void DeviceItem::newState(Status state)
 {
   switch (_typeState)
   {
@@ -79,7 +85,11 @@ void DeviceItem::newState(Status state = Status::OFF)
     else
       _state = Status::OPEN;
     break;
+  default:
+    _state = Status::OFF;
   }
+  digitalWrite(_pinName, ((_state == OPEN) || (_state == ON)) ? HIGH: LOW);
+  // Serial.printf("\nnewStatus = %d\n", ((_state == OPEN) || (_state == ON)) ? HIGH: LOW);
 }
 
 void DeviceItem::changeState()
@@ -162,76 +172,10 @@ int DeviceItem::getMinuteOff(){
       return -1;
 }
 
-// Not used - use addObject instead.
-// void DeviceItem::buildListObjects(std::vector<DeviceItem> listItems[], String jsonString, String key =""){
-//   Serial.printf("\n(DeviceItem::Build list object) size of listDevice = %d\n", listItems->size());
-//   while (listItems->size() > 0) listItems->pop_back();
-//   listItems->resize(0);
-//   Serial.printf("\n(DeviceItem::Build list object) size of listDevice after = %d\n", listItems->size());
-//   Serial.printf("\n(DeviceItem::Build list object) capacity of listDevice after = %d\n", listItems->capacity());
-//   Serial.printf("\n(DeviceItem::Build list object) key = %s\n", key.c_str());
-//   DynamicJsonDocument json(1024*100);
-//   // problem
-//   /*
-//   Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandled.
-// Core 1 register dump:
-// PC      : 0x400eb8b6  PS      : 0x00060330  A0      : 0x800f28fd  A1      : 0x3fff5600  
-// A2      : 0x00000000  A3      : 0x3fff57f4  A4      : 0x00000000  A5      : 0x00000000
-// A6      : 0x3fff59e0  A7      : 0x00000008  A8      : 0x3fff5910  A9      : 0x3fff55f0  
-// A10     : 0x3fff5610  A11     : 0x3ff9c510  A12     : 0x000000ff  A13     : 0x0000ff00  
-// A14     : 0x00ff0000  A15     : 0xff000000  SAR     : 0x00000010  EXCCAUSE: 0x0000001c
-// EXCVADDR: 0x00000000  LBEG    : 0x400014fd  LEND    : 0x4000150d  LCOUNT  : 0xffffffff  
-
-// ELF file SHA256: 0000000000000000
-
-// Backtrace: 0x400eb8b6:0x3fff5600 0x400f28fa:0x3fff5910 0x400f2932:0x3fff59a0 0x400e6e72:0x3fff59e0 0x400e339e:0x3fff5a80 0x400e6531:0x3fff62f0 0x400d1d39:0x3fff6340 0x400d78c5:0x3fff63c0 0x400da9dd:0x3fff64b0 0x400db047:0x3fff6770 0x400db2f5:0x3fff6790 0x400db34d:0x3fff6830 0x400db414:0x3fff6850 0x40089ab2:0x3fff6870
-//   */
-//   // json->clear();
-//   deserializeJson(json, jsonString);
-//   json.shrinkToFit();
-//   Serial.printf("\n(DeviceItem::build list object) json size: %d", json.size());
-//   Serial.printf("\nJson: ");
-//   // Serial.printf(json[key][0]["name"]);
-//   // Serial.println("\nlistDevices: ");
-//   // for (int i = 0; i < *json["length"]->as<int>(); i++){
-//   //   bool _days[7];
-//   //   for (int j = 0; j<7; j++)
-//   //   {_days[j] = json[key][i]["days"][j].as<bool>();
-//   //   Serial.printf("\n(DeviceItem::buildlistObject) _days[%d] : ",j);
-//   //   Serial.println(_days[j]);}
-//   //   listItems->push_back(DeviceItem(
-//   //     json[key][i]["name"].as<String>(),
-//   //     json[key][i]["id"].as<int>(),
-//   //     json[key][i]["pinName"].as<int>(),
-//   //     (json[key][i]["status"].as<int>() == 1)? Status::ON:Status::OFF,
-//   //     json[key][i]["timer"].as<bool>(),
-//   //     json[key][i]["timerOnState"].as<bool>(),
-//   //     json[key][i]["timerOffState"].as<bool>(),
-//   //     (json[key][i]["typeState"].as<int>() == 1)? TypeStatus::OnOff:TypeStatus::OpenClose,
-//   //     json[key][i]["timerOn"].as<int>(),
-//   //     json[key][i]["timerOff"].as<int>(),
-//   //     (json[key][i]["repeat"].as<int>() == 0) ? Repeat::Once :(json[key][i]["repeat"].as<int>() == 1 ? Repeat::Everyday:Repeat::Option),
-//   //     _days
-//   //   ));
-//   //   Serial.println(listItems->at(i).name());
-//   // }
-//   Serial.printf("\n(DeviceItem::build list object) json size: %d", json.size());
-//   Serial.printf("\n(DeviceItem::build list object) list size: %d", listItems->size());
-//   // json.remove(key);
-//   // json.remove("users");
-//   // json.remove("length");
-//   // json.clear();
-//   Serial.printf("\n(DeviceItem::build list object) json size affter: %d", json.size());
-//   Serial.println("\n(DeviceItem::Build list object) Complete build list devices");
-// }
-
 void DeviceItem::addObject(std::vector<DeviceItem> listItems[], String jsonString){
   DynamicJsonDocument json(1024);
   deserializeJson(json, jsonString);
   json.shrinkToFit();
-  // Serial.printf("\n(DeviceItem::addObject) json size: %d", json.size());
-  // Serial.printf("\n(DeviceItem::addObject) Devices: ");
-  // Serial.printf(json["name"]);
   
   bool _days[7];
   for (int j = 0; j<7; j++){
@@ -254,12 +198,15 @@ void DeviceItem::addObject(std::vector<DeviceItem> listItems[], String jsonStrin
     (json["repeat"].as<int>() == 0) ? Repeat::Once :(json["repeat"].as<int>() == 1 ? Repeat::Everyday:Repeat::Option),
     _days
   ));
-
-  // Serial.printf("\n(DeviceItem::addObject) json size: %d", json.size());
-  // Serial.printf("\n(DeviceItem::addObject) list size: %d", listItems->size());
+  // Serial.println("\n -- Device infor --");
+  // Serial.printf("\nid = %d\ttimer = %d", listItems->at(listItems->size() -1).id(), listItems->at(listItems->size() -1).timer()? 1 : 0);
+  // Serial.printf("\nOffState = %d\tOff = %d\n", listItems->at(listItems->size() -1).timerOffState()? 1:0, listItems->at(listItems->size() -1).timerOff());
+  // Serial.printf("\nOnState = %d\tOn = %d\n", listItems->at(listItems->size() -1).timerOnState()? 1:0, listItems->at(listItems->size() -1).timerOn());
+  // // Serial.printf("\n(DeviceItem::addObject) json size: %d", json.size());
+  // // Serial.printf("\n(DeviceItem::addObject) list size: %d", listItems->size());
   json.clear();
   // Serial.printf("\n(DeviceItem::addObject) json size affter: %d", json.size());
-  Serial.println("\n(DeviceItem::addObject) Complete build list devices\n");
+  // Serial.println("\n(DeviceItem::addObject) Complete add device\n");
 }
 
 void DeviceItem::updateObject(std::vector<DeviceItem> listItems[], int index, String jsonString){
@@ -367,22 +314,22 @@ bool DeviceItem::isTimeToOff(){
 // Check timerOn and timerOff
 // mode = true -> Check timerOn
 // mode = false -> Check timerOff
-bool DeviceItem::checkTimer(int time, bool mode){
-  WiFiUDP ntpUDP;
-  NTPClient timeClient(ntpUDP);
-
+bool DeviceItem::checkTimer(long time, bool mode){
+  static WiFiUDP ntpUDP;
+  static NTPClient timeClient(ntpUDP);
+  // int time = mode == true? _timerOn: _timerOff;
   timeClient.begin();
   timeClient.setTimeOffset(+7*60*60);
   while(!timeClient.update()) 
     timeClient.forceUpdate();
 
-  int timeNow = timeClient.getHours()*3600 + timeClient.getMinutes()*60 + timeClient.getSeconds();
+  long timeNow = timeClient.getHours()*3600 + timeClient.getMinutes()*60 + timeClient.getSeconds();
   // Serial.printf("\n(DeviceItem::checkTimer) Time now: %d:%d:%d\n", timeClient.getHours(), timeClient.getMinutes(), timeClient.getSeconds());
   // Serial.printf("\n(DeviceItem::checkTimer) Time now in second: %d", timeNow);
   switch (repeat())
   {
   case Repeat::Once:
-    if ((timeNow - time >= 0) && (timeNow - time <=  15)) {
+    if ((timeNow - time >= 0) && (timeNow - time <=  60)) {
       if (mode){
         newState(Status::ON);
         newTimerOnState(false);}
@@ -394,14 +341,14 @@ bool DeviceItem::checkTimer(int time, bool mode){
       }      
     break;
   case Repeat::Everyday:
-    if ((timeNow - time >= 0) && (timeNow - time <=  15)) {
+    if ((timeNow - time >= 0) && (timeNow - time <=  60)) {
       if (mode) newState(Status::ON);
       else newState(Status::OFF);
       return true;}
     break;
   case Repeat::Option:
     if (day(timeClient.getDay()))
-      if ((timeNow - time >= 0) && (timeNow - time <=  15)) {
+      if ((timeNow - time >= 0) && (timeNow - time <=  60)) {
         if (mode) newState(Status::ON);
         else newState(Status::OFF);
         return true;}
